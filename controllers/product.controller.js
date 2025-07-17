@@ -59,3 +59,71 @@ exports.addProductPreview = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+
+exports.updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    // Validate ID
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ error: "Invalid product ID" });
+    }
+
+    // Basic required fields check (adjust as needed)
+    if (!updateData.name || !updateData.price) {
+      return res.status(400).send({ error: "Name and price are required" });
+    }
+
+    const result = await productCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).send({ error: "Product not found" });
+    }
+
+    res.send({ success: true, updatedId: id });
+  } catch (error) {
+    console.error("Error updating product:", error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.getSingleProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate MongoDB ID
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ 
+        success: false,
+        error: "Invalid product ID format" 
+      });
+    }
+
+    const product = await productCollection.findOne({ 
+      _id: new ObjectId(id) 
+    });
+
+    if (!product) {
+      return res.status(404).json({ 
+        success: false,
+        error: "Product not found" 
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: product
+    });
+
+  } catch (error) {
+    console.error("Error fetching single product:", error);
+    res.status(500).json({ 
+      success: false,
+      error: "Internal server error" 
+    });
+  }
+};

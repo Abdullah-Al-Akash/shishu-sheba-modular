@@ -7,7 +7,7 @@ const app = express();
 // === Middlewares ===
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://shishu-sheba-client.vercel.app"],
+    origin: ["http://localhost:5173", "https://shshu-sheba.netlify.app"],
     credentials: true,
   })
 );
