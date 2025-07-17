@@ -65,14 +65,9 @@ exports.updateProduct = async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
 
-    // Validate ID
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).send({ error: "Invalid product ID" });
-    }
-
-    // Basic required fields check (adjust as needed)
-    if (!updateData.name || !updateData.price) {
-      return res.status(400).send({ error: "Name and price are required" });
+    // Remove _id from updateData if it exists
+    if (updateData._id) {
+      delete updateData._id;
     }
 
     const result = await productCollection.updateOne(
@@ -94,7 +89,6 @@ exports.updateProduct = async (req, res) => {
 exports.getSingleProduct = async (req, res) => {
   try {
     const { id } = req.params;
-
     // Validate MongoDB ID
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ 

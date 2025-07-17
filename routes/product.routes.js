@@ -16,6 +16,6 @@ router.get("/:id", getProductById);
 router.get("/single/:id", getSingleProduct);
 router.get("/category/:category", getProductsByCategory);
 router.post("/add-product", addProductPreview);
-router.post("/:id", updateProduct);
+router.put("/:id", updateProduct);
 
 module.exports = router;
