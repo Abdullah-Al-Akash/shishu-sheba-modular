@@ -56,10 +56,10 @@ exports.updateOrder = async (req, res) => {
       const resultFind = await orderCollection.find({ _id: new ObjectId(id) }).toArray();
       console.log(resultFind);
       // Optionally update:
-      // result = await orderCollection.updateOne(
-      //   { _id: new ObjectId(id) },
-      //   { $set: { status, deliveredBy } }
-      // );
+      result = await orderCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { status, deliveredBy } }
+      );
     }
     if (cancelBy) {
       result = await orderCollection.updateOne(

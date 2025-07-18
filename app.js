@@ -14,6 +14,8 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
+const dashboardRoutes = require('./routes/dashboard.routes');
+
 // === Routes ===
 app.use("/v1/products", require("./routes/product.routes"));
 app.use("/v1", require("./routes/order.routes"));
@@ -21,6 +23,7 @@ app.use("/v1", require("./routes/auth.routes"));
 app.use("/v1/banner", require("./routes/banner.routes"));
 app.use("/v1/youtube", require("./routes/youtube.routes"));
 app.use("/v1/categories", require("./routes/category.routes"));
+app.use('/v1/dashboard', dashboardRoutes);
 // app.use("/v1/steadfast", require("./routes/steadfast.routes"));
 
 // === Error Handling Middleware ===
