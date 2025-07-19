@@ -9,7 +9,8 @@ const isProduction = process.env.NODE_ENV === "production";
 const allowedOrigins = [
   "http://localhost:5173", 
   "https://shishu-sheba.netlify.app", 
-  "https://shishuseba.com"
+  "https://shishuseba.com",
+  "https://shishu-sheba-server.onrender.com"
 ];
 
 // === Enhanced CORS Configuration ===
