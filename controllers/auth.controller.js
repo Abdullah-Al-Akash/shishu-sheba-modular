@@ -19,6 +19,7 @@ const getCookieSettings = (req) => {
   let domain;
   try {
     domain = new URL(requestOrigin).hostname;
+    console.log(domain);
   } catch (e) {
     domain = undefined;
   }
