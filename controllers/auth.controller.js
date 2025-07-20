@@ -43,9 +43,9 @@ exports.loginUser = async (req, res) => {
       return res.status(400).json({ message: "Email and password required" });
     }
 
-    const user = await usersCollection.findOne({ email });
-
-    if (!user || user.password !== password) {
+    const user = await usersCollection.findOne({ email, password });
+    console.log(user);
+    if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
