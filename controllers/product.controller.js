@@ -6,9 +6,6 @@ const productCollection = client.db("sishuSheba").collection("products");
 exports.addProduct = async (req, res) => {
   try {
     const product = req.body;
-    if (!product.name || !product.price || !product.image || !product.category) {
-      return res.status(400).send({ error: "Missing required fields" });
-    }
     const result = await productCollection.insertOne(product);
     res.status(201).send({ success: true, insertedId: result.insertedId });
   } catch (error) {
