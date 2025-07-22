@@ -28,7 +28,7 @@ exports.getOrdersByStatus = async (req, res) => {
 exports.updateOrder = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, approvedBy, processBy, deliveredBy, cancelBy, admin_note } = req.body;
+    const { status, approvedBy, processBy, deliveredBy, shippingBy, cancelBy, admin_note } = req.body;
 
     let result;
 
@@ -50,16 +50,38 @@ exports.updateOrder = async (req, res) => {
         { $set: { status, processBy } }
       );
     }
-    if (deliveredBy) {
-      // Currently you had some commented code here — keep or update if needed
-      // For now, just find and respond (you can update later)
-      const resultFind = await orderCollection.find({ _id: new ObjectId(id) }).toArray();
-      console.log(resultFind);
-      // Optionally update:
+
+    if(shippingBy){
       result = await orderCollection.updateOne(
         { _id: new ObjectId(id) },
-        { $set: { status, deliveredBy } }
+        { $set: { status, shippingBy } }
       );
+    }
+    if (deliveredBy) {
+      try {
+        // Step 1: update the order
+        // await orderCollection.updateOne(
+        //   { _id: new ObjectId(id) },
+        //   {
+        //     $set: {
+        //       ...(status && { status }),
+        //       ...(deliveredBy && { deliveredBy }),
+        //       ...(cancelBy && { cancelBy }),
+        //     },
+        //   }
+        // );
+
+        // ✅ Step 2: এখন আবার সেই order টা খুঁজে বের করো
+        const updatedOrder = await orderCollection.findOne({
+          _id: new ObjectId(id),
+        });
+
+        // ✅ Step 3: এটাকে response হিসেবে পাঠাও
+        res.send(updatedOrder);
+      } catch (err) {
+        console.error(err);
+        res.status(500).send({ error: "Update failed" });
+      }
     }
     if (cancelBy) {
       result = await orderCollection.updateOne(
@@ -78,3 +100,34 @@ exports.updateOrder = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+exports.trackOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    console.log("Searching for order ID:", orderId);
+    
+    // Correct way to find by orderId field
+    const order = await orderCollection.findOne({ orderId: orderId });
+    
+    if (!order) {
+      console.log("Order not found for ID:", orderId);
+      return res.status(404).json({ 
+        success: false,
+        error: "Order not found" 
+      });
+    }
+
+    console.log("Order found:", order._id);
+    res.json({ 
+      success: true, 
+      order 
+    });
+  } catch (error) {
+    console.error("Error tracking order:", error);
+    res.status(500).json({ 
+      success: false,
+      error: "Internal Server Error",
+      details: error.message 
+    });
+  }
+}
