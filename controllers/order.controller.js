@@ -60,16 +60,16 @@ exports.updateOrder = async (req, res) => {
     if (deliveredBy) {
       try {
         // Step 1: update the order
-        // await orderCollection.updateOne(
-        //   { _id: new ObjectId(id) },
-        //   {
-        //     $set: {
-        //       ...(status && { status }),
-        //       ...(deliveredBy && { deliveredBy }),
-        //       ...(cancelBy && { cancelBy }),
-        //     },
-        //   }
-        // );
+        await orderCollection.updateOne(
+          { _id: new ObjectId(id) },
+          {
+            $set: {
+              ...(status && { status }),
+              ...(deliveredBy && { deliveredBy }),
+              ...(cancelBy && { cancelBy }),
+            },
+          }
+        );
 
         // ✅ Step 2: এখন আবার সেই order টা খুঁজে বের করো
         const updatedOrder = await orderCollection.findOne({
