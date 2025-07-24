@@ -131,3 +131,50 @@ exports.trackOrder = async (req, res) => {
     });
   }
 }
+
+// Update full order details (for edit modal)
+exports.updateFullOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const orderData = req.body;
+
+    // Remove _id from items and the main order if present
+    delete orderData._id;
+    if (orderData.items) {
+      orderData.items = orderData.items.map(item => {
+        delete item._id; // Remove _id from each item
+        return item;
+      });
+    }
+
+    // Calculate new totals if items were modified
+    if (orderData.items) {
+      orderData.subtotal = orderData.items.reduce(
+        (sum, item) => sum + (item.price * item.quantity), 
+        0
+      );
+      orderData.total = orderData.subtotal + (orderData.shippingCost || 0);
+    }
+
+    const result = await orderCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: orderData }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    const updatedOrder = await orderCollection.findOne({ _id: new ObjectId(id) });
+    res.json({ 
+      success: true, 
+      order: updatedOrder 
+    });
+  } catch (error) {
+    console.error("Order update failed:", error);
+    res.status(500).json({ 
+      error: "Internal Server Error",
+      details: error.message 
+    });
+  }
+};
