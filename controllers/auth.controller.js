@@ -4,33 +4,65 @@ const usersCollection = client.db("sishuSheba").collection("admin");
 
 // === Register Controller ===
 exports.registerUser = async (req, res) => {
-  const { name, email, password } = req.body;
-
+  const { name, email, password, role } = req.body;
+  
   try {
+    // Validate required fields
     if (!name || !email || !password) {
-      return res.status(400).json({ message: "Name, email, and password are required" });
+      return res.status(400).json({ 
+        success: false,
+        message: "Name, email, and password are required" 
+      });
     }
 
+    // Validate role if provided
+    if (role && !['admin', 'moderator'].includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid role. Must be either 'admin' or 'moderator'"
+      });
+    }
+
+    // Check for existing user
     const existingUser = await usersCollection.findOne({ email });
-
     if (existingUser) {
-      return res.status(409).json({ message: "User already exists" });
+      return res.status(409).json({ 
+        success: false,
+        message: "User already exists" 
+      });
     }
 
+    // Create new user object
     const newUser = {
       name,
       email,
-      password,
-      role: "admin", // Default role
+      password, // Storing plain password (not recommended for production)
+      role: role || 'moderator', // Default to moderator if not specified
       createdAt: new Date(),
+      updatedAt: new Date()
     };
 
-    await usersCollection.insertOne(newUser);
+    // Insert into database
+    const result = await usersCollection.insertOne(newUser);
 
-    res.status(201).json({ message: "Registration successful" });
+    // Return success response without sensitive data
+    res.status(201).json({ 
+      success: true,
+      message: "Registration successful",
+      data: {
+        id: result.insertedId,
+        name,
+        email,
+        role: newUser.role
+      }
+    });
+
   } catch (error) {
-    console.error("Register error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Registration error:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Internal server error" 
+    });
   }
 };
 
@@ -77,7 +109,9 @@ exports.deleteUser = async (req, res) => {
     }
 
     if (user.role !== "admin") {
-      return res.status(403).json({ message: "Cannot delete: user is not an admin" });
+      return res
+        .status(403)
+        .json({ message: "Cannot delete: user is not an admin" });
     }
 
     const result = await usersCollection.deleteOne({ _id: new ObjectId(id) });
@@ -97,7 +131,7 @@ exports.deleteUser = async (req, res) => {
 exports.getAllAdmins = async (req, res) => {
   try {
     const admins = await usersCollection
-      .find({ role: "admin" })
+      .find()
       .project({ password: 0 }) // exclude password
       .toArray();
 
