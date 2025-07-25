@@ -108,11 +108,11 @@ exports.deleteUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if (user.role !== "admin") {
-      return res
-        .status(403)
-        .json({ message: "Cannot delete: user is not an admin" });
-    }
+    // if (user.role !== "admin") {
+    //   return res
+    //     .status(403)
+    //     .json({ message: "Cannot delete: user is not an admin" });
+    // }
 
     const result = await usersCollection.deleteOne({ _id: new ObjectId(id) });
 
