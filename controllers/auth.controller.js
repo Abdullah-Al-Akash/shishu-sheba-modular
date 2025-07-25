@@ -21,7 +21,7 @@ exports.registerUser = async (req, res) => {
       name,
       email,
       password,
-      role: "admin", // fixed role
+      role: "admin", // Default role
       createdAt: new Date(),
     };
 
