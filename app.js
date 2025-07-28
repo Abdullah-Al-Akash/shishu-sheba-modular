@@ -10,13 +10,6 @@ const app = express();
 app.use(helmet());
 app.set("trust proxy", 1);
 
-// === Rate Limiting ===
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 200,
-  message: "Too many requests, please try again later",
-});
-
 // === CORS ===
 const allowedOrigins = [
   "http://localhost:5173",
@@ -24,6 +17,31 @@ const allowedOrigins = [
   "https://shishuseba.com",
   "https://shishu-sheba-server.onrender.com",
 ];
+
+// Optional: regex pattern matching for preview builds or all localhost ports
+function isAllowedOrigin(origin) {
+  if (!origin) return true; // allow tools like Postman
+  return (
+    allowedOrigins.includes(origin) ||
+    /^https:\/\/[a-zA-Z0-9-]+--shishu-sheba\.netlify\.app$/.test(origin) || // Netlify preview builds
+    /^http:\/\/localhost:\d+$/.test(origin) // all localhost ports (like 5173, 3000, etc.)
+  );
+}
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      console.log("🚀 Incoming Origin:", origin); // for debugging
+      if (isAllowedOrigin(origin)) {
+        return callback(null, true);
+      }
+      console.error("❌ CORS Blocked:", origin);
+      callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    exposedHeaders: ["set-cookie"],
+  })
+);
 
 app.use(
   cors({
@@ -69,7 +87,9 @@ app.use((err, req, res, next) => {
   console.error("Error:", err);
 
   if (err.message === "Not allowed by CORS") {
-    return res.status(403).json({ message: "CORS policy violation", allowedOrigins });
+    return res
+      .status(403)
+      .json({ message: "CORS policy violation", allowedOrigins });
   }
 
   res.status(500).json({
