@@ -15,6 +15,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "https://shishu-sheba.netlify.app",
   "https://shishuseba.com",
+  "https://www.shishuseba.com",
   "https://shishu-sheba-server.onrender.com",
 ];
 
